@@ -10,6 +10,8 @@ redis-wstream is a node.js redis write stream which streams binary or utf8 data 
 npm install redis-wstream
 ```
 
+You will also need the `redis` client (`npm install redis`) or other compatible library. You an also optionally install `hiredis` along with `redis` for additional performance.
+
 ## Usage
 
 Construct a write stream instance by passing in client and key to save stream to. Pipe to this instance and when end is emitted, the stream has been saved to redis.
@@ -25,6 +27,11 @@ readstream  // whatever read stream to read from
     // readstream was successfully saved to redis key: keyToSaveTo
   });
 ```
+
+Tested with mranney/node_redis client, but should work with any client that implements:
+
+ - `set(key, cb)`
+ - `append(key, cb)`
 
 ## Goals
 
