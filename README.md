@@ -40,6 +40,7 @@ Note: This module works by appending chunks to a key as the data is streamed in,
  - Simple write stream which can use existing redis client (and especially mranney/node_redis)
  - Remove all the complexity of managing a stream and storing to a redis key
  - Pipe a stream into this write stream to save
+ - stream-spec compliant node.js write stream
 
 ## Why
 
