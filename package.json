@@ -1,13 +1,25 @@
 {
   "name": "redis-wstream",
   "description": "redis-wstream - node.js redis write stream which streams binary or utf8 data into a redis key using an existing redis client",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "author": "Jeff Barczewski <jeff.barczewski@gmail.com>",
-  "repository": { "type": "git", "url": "http://github.com/jeffbski/redis-wstream.git" },
-  "bugs" : { "url": "http://github.com/jeffbski/redis-wstream/issues" },
-  "licenses": [{ "type": "MIT", "url" : "http://github.com/jeffbski/redis-wstream/raw/master/LICENSE" }],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jeffbski/redis-wstream.git"
+  },
+  "bugs": {
+    "url": "http://github.com/jeffbski/redis-wstream/issues"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "http://github.com/jeffbski/redis-wstream/raw/master/LICENSE"
+    }
+  ],
   "main": "lib/redis-wstream",
-  "engines": { "node": ">=0.8" },
+  "engines": {
+    "node": ">=0.8"
+  },
   "dependencies": {
     "pass-stream": "~0.0.6"
   },
@@ -25,5 +37,6 @@
     "write",
     "redis",
     "binary"
-  ]
+  ],
+  "optionalDependencies": {}
 }
