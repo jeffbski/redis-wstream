@@ -33,6 +33,8 @@ Tested with mranney/node_redis client, but should work with any client that impl
  - `set(key, cb)`
  - `append(key, cb)`
 
+Note: This module works by appending chunks to a key as the data is streamed in, so you will not want to use this key until it is finished uploading (`end` is called), you can do this in a variety of ways (keeping an active or status flag or loading to a temporary key, then renaming to the real key when done).
+
 ## Goals
 
  - Simple write stream which can use existing redis client (and especially mranney/node_redis)
