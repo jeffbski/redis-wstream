@@ -116,3 +116,11 @@ test('key null, throws error', function () {
   t.throws(throwsErr, /redisWStream requires client and key/);
 });
 
+test('destroy() cleans up all its listeners', function () {
+  var stream = redisWStream(client, KEY);
+  var dataListenerCount = stream.listeners('data').length;
+  t.isTrue(dataListenerCount > 0);
+  stream.destroy();
+  var afterDestroyDataListenerCount = stream.listeners('data').length;
+  t.equal(afterDestroyDataListenerCount, 0);
+});
