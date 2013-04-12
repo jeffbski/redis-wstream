@@ -1,6 +1,6 @@
 # redis-wstream
 
-redis-wstream is a node.js redis write stream which streams binary or utf8 data into a redis key using an existing redis client. Tested with mranney/node_redis client.
+redis-wstream is a node.js redis write stream which streams binary or utf8 data into a redis key using an existing redis client. Tested with mranney/node_redis client. (streams2)
 
 [![Build Status](https://secure.travis-ci.org/jeffbski/redis-wstream.png?branch=master)](http://travis-ci.org/jeffbski/redis-wstream)
 
@@ -20,13 +20,20 @@ Construct a write stream instance by passing in client and key to save stream to
 var redis = require('redis');
 var redisWStream = require('redis-wstream'); // factory
 var client = redis.createClient(); // create client using your options and auth
-readstream  // whatever read stream to read from
-  .pipe(redisWStream(client, 'keyToSaveTo')) // create write stream instance saving to keyToSaveTo
-  .on('error', function (err) { /* handle error */ })
-  .on('end', function () {
-    // readstream was successfully saved to redis key: keyToSaveTo
+var d = domain.create();
+d.on('error', function (err) {
+  /* handle error */
+  })
+  .run(function () {
+    readstream  // whatever read stream to read from
+      .pipe(redisWStream(client, 'keyToSaveTo')) // create write stream instance saving to keyToSaveTo
+      .on('finish', function () {
+        // readstream was successfully saved to redis key: keyToSaveTo
+      });
   });
 ```
+
+ - `redisWStream(client, saveKey, [options])` - construct a new write stream using redis `client`, saving to the key at `saveKey`. `options` can be used to provide additional stream options.
 
 Tested with mranney/node_redis client, but should work with any client that implements:
 
@@ -40,7 +47,7 @@ Note: This module works by appending chunks to a key as the data is streamed in,
  - Simple write stream which can use existing redis client (and especially mranney/node_redis)
  - Remove all the complexity of managing a stream and storing to a redis key
  - Pipe a stream into this write stream to save
- - stream-spec compliant node.js write stream
+ - uses streams2 from node 0.10+, but is also compatible with 0.8
 
 ## Why
 

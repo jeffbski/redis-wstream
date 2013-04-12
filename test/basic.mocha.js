@@ -22,12 +22,11 @@ function cleanup(cb) {
 beforeEach(function (done) { cleanup(done); });
 after(function (done) { cleanup(done); });
 
-test('basic use with string, stream data is stored and end is fired', function (done) {
+test('basic use with string, stream data is stored and finish is fired', function (done) {
   var stream = passStream();
   stream
     .pipe(redisWStream(client, KEY))
-    .on('error', function (err) { done(err); })
-    .on('end', function () {
+    .on('finish', function () {
       client.get(KEY, function (err, data) {
         if (err) return done(err);
         t.deepEqual(data, 'abcdefghi');
@@ -41,12 +40,11 @@ test('basic use with string, stream data is stored and end is fired', function (
   });
 });
 
-test('basic use with Buffer, stream data is stored and end is fired', function (done) {
+test('basic use with Buffer, stream data is stored and finish is fired', function (done) {
   var stream = passStream();
   stream
     .pipe(redisWStream(client, KEY))
-    .on('error', function (err) { done(err); })
-    .on('end', function () {
+    .on('finish', function () {
       client.get(new Buffer(KEY), function (err, data) {
         if (err) return done(err);
         t.deepEqual(data, new Buffer('abcdefghi123'));
@@ -66,10 +64,10 @@ test('basic use with binary data in Buffers', function (done) {
   var shasum = crypto.createHash('sha1');
   var resultDigest;
   var bytesToGenerate = DATA_LENGTH;
-  var stream = redisWStream(client, KEY);
+  var stream = passStream();
   stream
-    .on('error', function (err) { done(err); })
-    .on('end', function () {
+    .pipe(redisWStream(client, KEY))
+    .on('finish', function () {
       client.get(new Buffer(KEY), function (err, data) { // use Buffer key so returns Buffer data
         if (err) return done(err);
         var dataDigest = crypto.createHash('sha1').update(data).digest('base64');
@@ -99,28 +97,20 @@ test('all arguments missing for factory, throws error', function () {
   function throwsErr() {
     var stream = redisWStream();
   }
-  t.throws(throwsErr, /redisWStream requires client and key/);
+  t.throws(throwsErr, /RedisWStream requires client and key/);
 });
 
 test('client null, throws error', function () {
   function throwsErr() {
     var stream = redisWStream(null, KEY);
   }
-  t.throws(throwsErr, /redisWStream requires client and key/);
+  t.throws(throwsErr, /RedisWStream requires client and key/);
 });
 
 test('key null, throws error', function () {
   function throwsErr() {
     var stream = redisWStream(client, null);
   }
-  t.throws(throwsErr, /redisWStream requires client and key/);
+  t.throws(throwsErr, /RedisWStream requires client and key/);
 });
 
-test('destroy() cleans up all its listeners', function () {
-  var stream = redisWStream(client, KEY);
-  var dataListenerCount = stream.listeners('data').length;
-  t.isTrue(dataListenerCount > 0);
-  stream.destroy();
-  var afterDestroyDataListenerCount = stream.listeners('data').length;
-  t.equal(afterDestroyDataListenerCount, 0);
-});
