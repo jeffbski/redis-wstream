@@ -40,6 +40,66 @@ test('basic use with string, stream data is stored and finish is fired', functio
   });
 });
 
+test('options.clientMulti provided so rename added to it, user must exec when ready', function (done) {
+  var stream = passStream();
+  var clientMulti = client.multi(); // my batch
+  stream
+    .pipe(redisWStream(client, KEY, { clientMulti: clientMulti }))
+    .on('finish', function () {
+      // exec not called on clientMulti so won't exist yet
+      client.get(KEY, function (err, data) {
+        if (err) return done(err);
+        t.isNull(data);
+        clientMulti.exec(function (err) {
+          if (err) return done(err);
+          client.get(KEY, function (err, data) {
+            if (err) return done(err);
+            t.deepEqual(data, 'abcdefghi');
+            done();
+          });
+        });
+      });
+    });
+  process.nextTick(function () {
+    stream.write('abc');
+    stream.write('def');
+    stream.end('ghi');
+  });
+});
+
+test('options.tempKeySuffix is provided so use `saveKey + tempKeySuffix` for tempKey ', function (done) {
+  var stream = passStream();
+  var clientMulti = client.multi(); // my batch
+  var myTempKeySuffix = '.myUniqueTempSuffix';
+  stream
+    .pipe(redisWStream(client, KEY, { clientMulti: clientMulti, tempKeySuffix: myTempKeySuffix }))
+    .on('finish', function () {
+      // exec not called on clientMulti so saveKey won't exist yet, but saveKey+tempKeySuffix will
+      client.get(KEY + myTempKeySuffix, function (err, data) {
+        if (err) return done(err);
+        t.deepEqual(data, 'abcdefghi');
+        clientMulti.exec(function (err) {
+          if (err) return done(err);
+          client.get(KEY, function (err, data) {
+            if (err) return done(err);
+            t.deepEqual(data, 'abcdefghi');
+            client.get(KEY + myTempKeySuffix, function (err, data) {
+              if (err) return done(err);
+              t.isNull(data);
+              done();
+            });
+          });
+        });
+      });
+    });
+  process.nextTick(function () {
+    stream.write('abc');
+    stream.write('def');
+    stream.end('ghi');
+  });
+});
+
+
 test('basic use with Buffer, stream data is stored and finish is fired', function (done) {
   var stream = passStream();
   stream

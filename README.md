@@ -33,14 +33,17 @@ d.on('error', function (err) {
   });
 ```
 
- - `redisWStream(client, saveKey, [options])` - construct a new write stream using redis `client`, saving to the key at `saveKey`. `options` can be used to provide additional stream options.
+ - `redisWStream(client, saveKey, [options])` - construct a new write stream using redis `client`, saving to the key at `saveKey`. Client should not be a normal (non-multi batch) client otherwise it will accumulate the stream in memory before sending. You can provide a batch client as part of `options.clientMulti` if you want the final rename to happen as part of another batch.
+ - `options` can be used to provide additional stream options.
+ - `options.tempKeySuffix` - can be provided to tell redis what suffix to use for its temporary key which will be used while the stream is being written (which will be renamed to `saveKey` when complete). If not provided then a random string will be appended. Note that this needs to be unique so that concurrent writes for same key will not conflict with each other.
+ - `options.clientMulti` - if provided then once the stream is completely written, the rename operation will be written to this client but not executed, so you can later call `exec()` along with any other operations that are par of your transaction. If this option is not provided, then the rename will be performed and executed on the original client. So if you provide this option, you must call `options.clientMulti.exec()` yourself at some point after this finishes.
 
 Tested with mranney/node_redis client, but should work with any client that implements:
 
  - `set(key, cb)`
  - `append(key, cb)`
 
-Note: This module works by appending chunks to a key as the data is streamed in, so you will not want to use this key until it is finished uploading (`end` is called), you can do this in a variety of ways (keeping an active or status flag or loading to a temporary key, then renaming to the real key when done).
+Note: This module works by appending chunks to a tempKey as the data is streamed in, and then once complete, renames the tempKey to saveKey. In this way the original key is unaffected until the rename happens which is atomic. If `options.clientMulti` is provided then the rename will be appended after the stream is done writing and it is up to the user to `exec()` the multi client when they are ready for it to occur along with the rest of a batch.
 
 ## Goals
 
@@ -48,6 +51,7 @@ Note: This module works by appending chunks to a key as the data is streamed in,
  - Remove all the complexity of managing a stream and storing to a redis key
  - Pipe a stream into this write stream to save
  - uses streams2 from node 0.10+, but is also compatible with 0.8
+ - allow operation to be part of another multi operation (transaction) (if you use `options.clientMulti`)
 
 ## Why
 
