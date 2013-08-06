@@ -7,7 +7,7 @@ var redisWStream = require('..'); // require('redis-wstream');
 var passStream = require('pass-stream');
 var redis = require('redis');
 var client = redis.createClient(null, null, { detect_buffers: true });
-
+var immediate = (typeof setImmediate === 'function') ? setImmediate : process.nextTick;
 
 var t = chai.assert;
 
@@ -33,7 +33,7 @@ test('basic use with string, stream data is stored and finish is fired', functio
         done();
       });
     });
-  process.nextTick(function () {
+  immediate(function () {
     stream.write('abc');
     stream.write('def');
     stream.end('ghi');
@@ -60,7 +60,7 @@ test('options.clientMulti provided so rename added to it, user must exec when re
         });
       });
     });
-  process.nextTick(function () {
+  immediate(function () {
     stream.write('abc');
     stream.write('def');
     stream.end('ghi');
@@ -92,7 +92,7 @@ test('options.tempKeySuffix is provided so use `saveKey + tempKeySuffix` for tem
         });
       });
     });
-  process.nextTick(function () {
+  immediate(function () {
     stream.write('abc');
     stream.write('def');
     stream.end('ghi');
@@ -111,7 +111,7 @@ test('basic use with Buffer, stream data is stored and finish is fired', functio
         done();
       });
     });
-  process.nextTick(function () {
+  immediate(function () {
     stream.write(new Buffer('abc'));
     stream.write(new Buffer('def'));
     stream.end(new Buffer('ghi123'));
@@ -147,9 +147,9 @@ test('basic use with binary data in Buffers', function (done) {
       resultDigest = shasum.digest('base64');
       return;
     }
-    process.nextTick(gen); // use next tick so doesnt blow stack
+    immediate(gen); // use next tick so doesnt blow stack
   }
-  process.nextTick(gen); // kick it off
+  immediate(gen); // kick it off
 });
 
 
