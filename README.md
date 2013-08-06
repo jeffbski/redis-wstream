@@ -27,7 +27,7 @@ d.on('error', function (err) {
   .run(function () {
     readstream  // whatever read stream to read from
       .pipe(redisWStream(client, 'keyToSaveTo')) // create write stream instance saving to keyToSaveTo
-      .on('finish', function () {
+      .on('end', function () {
         // readstream was successfully saved to redis key: keyToSaveTo
       });
   });
