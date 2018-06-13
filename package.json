@@ -10,12 +10,7 @@
   "bugs": {
     "url": "http://github.com/jeffbski/redis-wstream/issues"
   },
-  "licenses": [
-    {
-      "type": "MIT",
-      "url": "http://github.com/jeffbski/redis-wstream/raw/master/LICENSE"
-    }
-  ],
+  "license": "MIT",
   "main": "lib/redis-wstream",
   "engines": {
     "node": ">=0.10"
