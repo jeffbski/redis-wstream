@@ -1,13 +1,15 @@
 /*global suite:false test:false */
 'use strict';
 
-var chai = require('chai-stack');
+var chai = require('chai');
 var crypto = require('crypto');
 var redisWStream = require('..'); // require('redis-wstream');
 var passStream = require('pass-stream');
 var redis = require('redis');
 var client = redis.createClient(null, null, { detect_buffers: true });
 var immediate = (typeof setImmediate === 'function') ? setImmediate : process.nextTick;
+
+chai.config.includeStack = true; // turn on stack trace
 
 var t = chai.assert;
 
@@ -21,6 +23,7 @@ function cleanup(cb) {
 
 beforeEach(function (done) { cleanup(done); });
 after(function (done) { cleanup(done); });
+after(function () { client.quit(); });
 
 test('basic use with string, stream data is stored and finish is fired', function (done) {
   var stream = passStream();
@@ -173,4 +176,3 @@ test('key null, throws error', function () {
   }
   t.throws(throwsErr, /RedisWStream requires client and key/);
 });
-
